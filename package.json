@@ -1,5 +1,5 @@
 {
-  "name": "global-txt-builder",
+  "name": "@m-lab-inc/global-txt-builder",
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
