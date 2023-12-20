@@ -44,9 +44,11 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const utils_1 = require("./utils");
 const constants_1 = require("./constants");
 const main = ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTargetDir }) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('args', translatorUrl, outputTargetDir, translateTargetDir);
     const targetTexts = yield getTranslateTargetTxt(translateTargetDir);
+    console.log('targetTexts', targetTexts);
     if (!targetTexts) {
-        throw Error('JSX の解析に失敗しました');
+        throw Error(`JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`);
     }
     console.log('globalTextMapCache!!', globalTextMapCache);
     const needGeneratedTexts = makeNeedGeneratedTexts(targetTexts, globalTextMapCache);
@@ -109,6 +111,7 @@ const makeOutputMap = (json, needGeneratedTexts) => {
 const getTranslateTargetTxt = (translateTargetDir) => __awaiter(void 0, void 0, void 0, function* () {
     // src ディレクトリ内の全 .tsx/.jsx ファイルを検索
     const paths = yield (0, glob_1.glob)(`${translateTargetDir}/**/*.+(tsx|jsx)`);
+    console.log('paths', paths, typeof paths);
     if (!Array.isArray(paths))
         return null;
     const targetTexts = [];

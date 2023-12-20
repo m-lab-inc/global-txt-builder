@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import {glob} from 'glob';
+import {glob, Glob} from 'glob';
 import * as parser from '@babel/parser';
 import traverse, {NodePath} from '@babel/traverse';
 import fetch from 'node-fetch';
@@ -20,9 +20,13 @@ export const main = async ({
   globalTextMapCache: object;
   translateTargetDir: string;
 }) => {
+  console.log('args', translatorUrl, outputTargetDir, translateTargetDir);
   const targetTexts = await getTranslateTargetTxt(translateTargetDir);
+  console.log('targetTexts', targetTexts);
   if (!targetTexts) {
-    throw Error('JSX の解析に失敗しました');
+    throw Error(
+      `JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`
+    );
   }
   console.log('globalTextMapCache!!', globalTextMapCache);
   const needGeneratedTexts = makeNeedGeneratedTexts(
@@ -117,6 +121,8 @@ const makeOutputMap = (json: string, needGeneratedTexts: string[]) => {
 const getTranslateTargetTxt = async (translateTargetDir: string) => {
   // src ディレクトリ内の全 .tsx/.jsx ファイルを検索
   const paths = await glob(`${translateTargetDir}/**/*.+(tsx|jsx)`);
+
+  console.log('paths', paths, typeof paths);
 
   if (!Array.isArray(paths)) return null;
 

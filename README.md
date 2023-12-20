@@ -1,7 +1,8 @@
 ## 導入
 
-```
+```shell
 npm i typescript -g
+yarn add git+https://github.com/m-lab-inc/global-txt-builder.git
 ```
 
 ## 使ってみる
