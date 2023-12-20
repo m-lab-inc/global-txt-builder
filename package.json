@@ -4,6 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "author": "hamaike",
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com/"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/@m-lab-inc/global-txt-builder.git"
