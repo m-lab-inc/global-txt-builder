@@ -1,15 +1,13 @@
 {
   "name": "@m-lab-inc/global-txt-builder",
-  "version": "0.0.1",
-  "main": "index.js",
+  "version": "0.0.2",
+  "main": "dist/index.js",
   "license": "MIT",
   "author": "hamaike",
   "publishConfig": {
-    "access": "restricted",
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://npm.pkg.github.com/m-lab-inc"
   },
   "repository": {
-    "type": "git",
     "url": "git://github.com/@m-lab-inc/global-txt-builder.git"
   },
   "bin": {
