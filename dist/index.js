@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -23,21 +24,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.start = void 0;
 const translateBuilder_1 = require("./translateBuilder");
 const fs = __importStar(require("fs"));
 const constants_1 = require("./constants");
 const utils_1 = require("./utils");
-const args = (0, utils_1.checkArgs)();
-console.log(`${args.outputTargetDir}/${constants_1.CACHE_FILENAME}`);
-try {
-    // キャッシュの json を取得
-    const file = fs.readFileSync(`${args.outputTargetDir}/${constants_1.CACHE_FILENAME}`, 'utf8');
-    const jsonObject = JSON.parse(file);
-    (0, translateBuilder_1.main)(Object.assign(Object.assign({}, args), { globalTextMapCache: jsonObject }));
-}
-catch (e) {
-    // キャッシュがなければ参照しない
-    console.info('キャッシュが見つかりませんでした、新しく生成します');
-    const jsonObject = JSON.parse('{}');
-    (0, translateBuilder_1.main)(Object.assign(Object.assign({}, args), { globalTextMapCache: jsonObject }));
-}
+const start = () => {
+    const args = (0, utils_1.checkArgs)();
+    console.log(`${args.outputTargetDir}/${constants_1.CACHE_FILENAME}`);
+    try {
+        // キャッシュの json を取得
+        const file = fs.readFileSync(`${args.outputTargetDir}/${constants_1.CACHE_FILENAME}`, 'utf8');
+        const jsonObject = JSON.parse(file);
+        (0, translateBuilder_1.main)(Object.assign(Object.assign({}, args), { globalTextMapCache: jsonObject }));
+    }
+    catch (e) {
+        // キャッシュがなければ参照しない
+        console.info('キャッシュが見つかりませんでした、新しく生成します');
+        const jsonObject = JSON.parse('{}');
+        (0, translateBuilder_1.main)(Object.assign(Object.assign({}, args), { globalTextMapCache: jsonObject }));
+    }
+};
+exports.start = start;
+(0, exports.start)();
