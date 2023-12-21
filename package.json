@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node ./dist/index.js 'http://localhost:5555' '/Users/hamaike/src/global-txt-builder/outputs' '/Users/hamaike/src/v-expo-3d/src' "
+    "start": "tsc && node ./dist/index.js 'http://localhost:5555' './outputs' '/Users/hamaike/src/v-expo-3d/src' "
   },
   "dependencies": {
     "@babel/parser": "^7.23.6",

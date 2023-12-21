@@ -63,13 +63,13 @@ exports.start = start;
 const main = ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTargetDir }) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('args', translatorUrl, outputTargetDir, translateTargetDir);
     const targetTexts = yield getTranslateTargetTxt(translateTargetDir);
-    console.log('targetTexts', targetTexts);
+    console.log('typeof targetTexts: ', typeof targetTexts);
     if (!targetTexts) {
         throw Error(`JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`);
     }
-    console.log('globalTextMapCache!!', globalTextMapCache);
+    console.info(`${targetTexts.length} 件のテキストが見つかりました`);
     const needGeneratedTexts = makeNeedGeneratedTexts(targetTexts, globalTextMapCache);
-    // console.log('needGeneratedTexts', needGeneratedTexts);
+    console.info(`${needGeneratedTexts.length} 件のテキストが翻訳対象です`);
     if (needGeneratedTexts.length === 0) {
         console.log('生成が必要なテキストはありません。処理をスキップします');
         return;
@@ -96,7 +96,6 @@ const makeNeedGeneratedTexts = (targetTexts, globalTextMapCache) => {
             needGeneratedTexts.push(targetTexts[index]);
         }
     });
-    console.log('hashedTargetTexts', hashedTargetTexts, hashedTargetTexts.length);
     return needGeneratedTexts;
 };
 const writeOutputs = (globalTextMap, outputTargetDir) => {
@@ -128,10 +127,12 @@ const makeOutputMap = (json, needGeneratedTexts) => {
 const getTranslateTargetTxt = (translateTargetDir) => __awaiter(void 0, void 0, void 0, function* () {
     // src ディレクトリ内の全 .tsx/.jsx ファイルを検索
     const paths = yield (0, glob_1.glob)(`${translateTargetDir}/**/*.+(tsx|jsx)`);
-    console.log('paths', paths, typeof paths);
+    console.info('typeof paths: ', typeof paths);
     if (!Array.isArray(paths))
         return null;
+    console.info(`${paths.length} 件の翻訳対象ファイルが見つかりました`);
     const targetTexts = [];
+    console.info(`対象ファイル群から、テキストの抜き出しを開始します`);
     paths.forEach(file => {
         const content = fs.readFileSync(file, 'utf-8');
         const ast = parser.parse(content, {
@@ -140,21 +141,20 @@ const getTranslateTargetTxt = (translateTargetDir) => __awaiter(void 0, void 0, 
         });
         (0, traverse_1.default)(ast, {
             JSXElement(path) {
-                // const openingElementName = path.node.openingElement.name;
-                // if (path.node.openingElement.name.name === 'GlobalText') {
                 if ('name' in path.node.openingElement.name &&
                     path.node.openingElement.name.name === 'GlobalText') {
                     path.node.children.forEach(child => {
                         if (child.type === 'JSXText') {
                             const text = (0, utils_1.normalizeString)(child.value);
-                            console.log('found text!!', text, text.length);
                             targetTexts.push(text);
+                            console.info('found text: ', text, text.length);
                         }
                     });
                 }
             }
         });
     });
+    console.info(`対象ファイル群から、テキストの抜き出しが完了しました`);
     return targetTexts;
 });
 const requestTranslatedData = (targetTexts, translatorUrl) => __awaiter(void 0, void 0, void 0, function* () {

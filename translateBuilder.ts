@@ -43,19 +43,20 @@ export const main = async ({
 }) => {
   console.log('args', translatorUrl, outputTargetDir, translateTargetDir);
   const targetTexts = await getTranslateTargetTxt(translateTargetDir);
-  console.log('targetTexts', targetTexts);
+  console.log('typeof targetTexts: ', typeof targetTexts);
   if (!targetTexts) {
     throw Error(
       `JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`
     );
   }
-  console.log('globalTextMapCache!!', globalTextMapCache);
+  console.info(`${targetTexts.length} 件のテキストが見つかりました`);
+
   const needGeneratedTexts = makeNeedGeneratedTexts(
     targetTexts,
     globalTextMapCache
   );
 
-  // console.log('needGeneratedTexts', needGeneratedTexts);
+  console.info(`${needGeneratedTexts.length} 件のテキストが未翻訳です`);
 
   if (needGeneratedTexts.length === 0) {
     console.log('生成が必要なテキストはありません。処理をスキップします');
@@ -67,7 +68,7 @@ export const main = async ({
     translatorUrl
   );
 
-  console.log('response', response);
+  console.log('response status: ', response.status);
 
   if (!(response.status === 200 && response.json)) {
     throw Error('chat-gpt へのリクエストが失敗しました');
@@ -99,7 +100,6 @@ const makeNeedGeneratedTexts = (
       needGeneratedTexts.push(targetTexts[index]);
     }
   });
-  console.log('hashedTargetTexts', hashedTargetTexts, hashedTargetTexts.length);
   return needGeneratedTexts;
 };
 
@@ -115,7 +115,6 @@ const writeOutputs = (globalTextMap: Output, outputTargetDir: string) => {
 
 const makeOutputMap = (json: string, needGeneratedTexts: string[]) => {
   const translated: {[lang: string]: string[]} = JSON.parse(json);
-  console.log('translated', translated);
   const output: Output = {};
   needGeneratedTexts.forEach((text, index) => {
     const hashedText = hashString(text);
@@ -143,11 +142,15 @@ const getTranslateTargetTxt = async (translateTargetDir: string) => {
   // src ディレクトリ内の全 .tsx/.jsx ファイルを検索
   const paths = await glob(`${translateTargetDir}/**/*.+(tsx|jsx)`);
 
-  console.log('paths', paths, typeof paths);
+  console.info('typeof paths: ', typeof paths);
 
   if (!Array.isArray(paths)) return null;
 
+  console.info(`${paths.length} 件の翻訳対象ファイルが見つかりました`);
+
   const targetTexts: string[] = [];
+
+  console.info(`対象ファイル群から、テキストの抜き出しを開始します`);
 
   paths.forEach(file => {
     const content = fs.readFileSync(file, 'utf-8');
@@ -158,9 +161,6 @@ const getTranslateTargetTxt = async (translateTargetDir: string) => {
 
     traverse(ast, {
       JSXElement(path) {
-        // const openingElementName = path.node.openingElement.name;
-
-        // if (path.node.openingElement.name.name === 'GlobalText') {
         if (
           'name' in path.node.openingElement.name &&
           path.node.openingElement.name.name === 'GlobalText'
@@ -168,14 +168,16 @@ const getTranslateTargetTxt = async (translateTargetDir: string) => {
           path.node.children.forEach(child => {
             if (child.type === 'JSXText') {
               const text = normalizeString(child.value);
-              console.log('found text!!', text, text.length);
               targetTexts.push(text);
+              console.info('found text: ', text, text.length);
             }
           });
         }
       }
     });
   });
+
+  console.info(`対象ファイル群から、テキストの抜き出しが完了しました`);
   return targetTexts;
 };
 
