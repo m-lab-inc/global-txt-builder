@@ -30,7 +30,9 @@ create-global-txt 'http://localhost:5555' '/Users/hamaike/src/v-expo-3d/src/cons
 
 ## React で使用する
 
-冒頭でインストールした、@m-lab-inc/global-txt-builder から インポートして下さい。
+本モジュールは、React コンポーネントそのものを提供するものではありません。
+
+冒頭でインストールした、@m-lab-inc/global-txt-builder から getTranslatedTxt をインポートして下さい。
 
 上述の create-global-txt コマンドで生成した json を、getTranslatedTxt に渡す事で翻訳済みテキストが取得可能です。
 
@@ -39,41 +41,40 @@ create-global-txt 'http://localhost:5555' '/Users/hamaike/src/v-expo-3d/src/cons
 ```tsx
 import React, {FC, useMemo} from 'react';
 import {getTranslatedTxt} from '@m-lab-inc/global-txt-builder/dist/utils.js';
+import {parseRfc5646LanguageTagFromUrl} from '../../../utils/langUtils';
+// core
 import globalTextMap from '../../../constants/globalTxtBuilder/outputs/globalTextMapCache.json';
-
 // mui
 import {Typography} from '@mui/material';
 import {TypographyProps} from '@mui/material/Typography/Typography';
-import {getLangCode} from '../../../utils/queryParamsHandler';
 
-interface Props {
-  typographyProps?: TypographyProps;
-}
-
-const GlobalText: FC<Props> = React.memo(({children, typographyProps = {}}) => {
+const GlobalText: FC<TypographyProps> = React.memo(({children, ...rest}) => {
   const getLang = () => {
-    if (process.env.BUILD_LANG) {
-      return process.env.BUILD_LANG;
+    if (process.env.NEXT_PUBLIC_BUILD_LANG) {
+      return process.env.NEXT_PUBLIC_BUILD_LANG;
     } else if (typeof window !== 'undefined') {
-      // &lang=en などのクエリパラメーターから lang を取得
-      return getLangCode();
+      return parseRfc5646LanguageTagFromUrl(window.location.href);
     }
     return null;
   };
 
+  const lang = getLang();
+
+  console.info('lang', lang);
+
   const translatedTxt = getTranslatedTxt({
-    lang: getLang(),
+    lang: lang,
     reactNode: children,
     globalTextMap
   });
 
-  return <Typography {...typographyProps}>{translatedTxt}</Typography>;
+  return <Typography {...rest}>{translatedTxt}</Typography>;
 });
 
 export default GlobalText;
 ```
 
-このように使用する事で、「快適にご利用いただくために」は翻訳されます
+下記の様に使用する事で、「快適にご利用いただくために」は翻訳されます
 
 ```tsx
 const Test = () => {
@@ -81,9 +82,20 @@ const Test = () => {
 }
 ```
 
+npm-scripts に、下記の様に記述すれば、CI/CD に組み込むこともできるでしょう。
+
+```json
+{
+  "scripts": {
+    "gtb": "create-global-txt 'https://global-txt-server-hrqpvmnz3q-an.a.run.app' './src/constants/globalTxtBuilder/outputs' './src'",
+    "build:gtb": "npm run gtb && NEXT_PUBLIC_ENV=prd NEXT_PUBLIC_BUILD_LANG=en next build"
+  }
+}
+```
+
 # コントリビューター向け
 
-## 多言語マップ生成をビルド
+## 多言語マップjsonをビルド
 
 ```shell
 yarn build
@@ -95,13 +107,19 @@ yarn build
 node ./dist/index.js 'http://localhost:5555' '/Users/hamaike/src/global-txt-builder/outputs' '/Users/hamaike/src/v-expo-3d/src'
 ```
 
-## React コンポーネントの開発
-
-```shell
-next dev
-```
-
 ## デプロイ
+
+ビルド後に、メインブランチに push するだけです
+
+## ChatGPT サーバー
+
+cloudrun にデプロイ済み、エンドポイントは下記
+
+https://global-txt-server-hrqpvmnz3q-an.a.run.app
+
+リポジトリ
+
+https://github.com/m-lab-inc/global-txt-server
 
 ## 諸注意
 
