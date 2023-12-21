@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import {start} from './translateBuilder';
 
-start();
+if (require.main === module) {
+  start();
+}
 
 export {hashString, getTranslatedTxt, normalizeString} from './utils';
