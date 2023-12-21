@@ -38,7 +38,7 @@ create-global-txt 'http://localhost:5555' '/Users/hamaike/src/v-expo-3d/src/cons
 
 ```tsx
 import React, {FC, useMemo} from 'react';
-import {getTranslatedTxt} from '@m-lab-inc/global-txt-builder';
+import {getTranslatedTxt} from '@m-lab-inc/global-txt-builder/dist/utils.js';
 import globalTextMap from '../../../constants/globalTxtBuilder/outputs/globalTextMapCache.json';
 
 // mui
@@ -55,6 +55,7 @@ const GlobalText: FC<Props> = React.memo(({children, typographyProps = {}}) => {
     if (process.env.BUILD_LANG) {
       return process.env.BUILD_LANG;
     } else if (typeof window !== 'undefined') {
+      // &lang=en などのクエリパラメーターから lang を取得
       return getLangCode();
     }
     return null;
@@ -70,7 +71,6 @@ const GlobalText: FC<Props> = React.memo(({children, typographyProps = {}}) => {
 });
 
 export default GlobalText;
-
 ```
 
 このように使用する事で、「快適にご利用いただくために」は翻訳されます
