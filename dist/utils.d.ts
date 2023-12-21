@@ -7,7 +7,7 @@ export declare const checkArgs: () => {
     translateTargetDir: string;
 };
 export declare const getTranslatedTxt: ({ lang, reactNode, globalTextMap }: {
-    lang: string;
+    lang: string | null | undefined;
     reactNode: any;
     globalTextMap: Output;
 }) => string;
