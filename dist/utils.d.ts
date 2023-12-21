@@ -1,3 +1,4 @@
+import { Output } from './models';
 export declare const hashString: (str: string) => string;
 export declare const normalizeString: (str: string) => string;
 export declare const checkArgs: () => {
@@ -5,3 +6,8 @@ export declare const checkArgs: () => {
     outputTargetDir: string;
     translateTargetDir: string;
 };
+export declare const getTranslatedTxt: ({ lang, reactNode, globalTextMap }: {
+    lang: string;
+    reactNode: any;
+    globalTextMap: Output;
+}) => string;

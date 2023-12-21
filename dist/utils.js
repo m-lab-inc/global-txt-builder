@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkArgs = exports.normalizeString = exports.hashString = void 0;
+exports.getTranslatedTxt = exports.checkArgs = exports.normalizeString = exports.hashString = void 0;
 const crypto = __importStar(require("crypto"));
 const hashString = (str) => {
     return crypto.createHash('sha256').update(str).digest('hex');
@@ -46,3 +46,24 @@ const checkArgs = () => {
     };
 };
 exports.checkArgs = checkArgs;
+const getTranslatedTxt = ({ lang, reactNode, globalTextMap }) => {
+    if (typeof reactNode === 'string') {
+        if (!lang)
+            return reactNode;
+        const normalizedTxt = (0, exports.normalizeString)(reactNode);
+        console.info('length', normalizedTxt.length);
+        const hashedStr = (0, exports.hashString)(normalizedTxt);
+        const globalTextMapItem = globalTextMap[hashedStr];
+        if (globalTextMapItem) {
+            return globalTextMapItem[lang];
+        }
+        else {
+            console.info('マップがありません', reactNode, hashedStr);
+        }
+        return reactNode;
+    }
+    else {
+        throw Error('reactNode は、string である必要があります');
+    }
+};
+exports.getTranslatedTxt = getTranslatedTxt;

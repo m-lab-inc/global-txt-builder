@@ -3,4 +3,4 @@ import {start} from './translateBuilder';
 
 start();
 
-export * from './components/GlobalText';
+export {hashString, getTranslatedTxt, normalizeString} from './utils';

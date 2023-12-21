@@ -1,3 +1,4 @@
+export declare const start: () => void;
 export declare const main: ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTargetDir }: {
     translatorUrl: string;
     outputTargetDir: string;

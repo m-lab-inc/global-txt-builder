@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-export declare const start: () => void;
+export { hashString, getTranslatedTxt, normalizeString } from './utils';

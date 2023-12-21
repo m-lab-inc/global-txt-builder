@@ -2,3 +2,4 @@
 node_modules/
 outputs/
 .next/
+.DS_Store
