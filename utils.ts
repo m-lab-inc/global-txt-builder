@@ -27,7 +27,7 @@ export const getTranslatedTxt = ({
   reactNode,
   globalTextMap
 }: {
-  lang: string;
+  lang: string | null | undefined;
   reactNode: any;
   globalTextMap: Output;
 }) => {
