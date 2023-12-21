@@ -7,6 +7,7 @@ yarn add git+https://github.com/m-lab-inc/global-txt-builder.git
 ```
 
 シンボリックリンクがはられているか下記のコマンドで確認可能
+
 "create-global-txt" があればOK
 
 ```shell
@@ -15,11 +16,11 @@ ls node_modules/.bin
 
 ## 多言語マップを生成する
 
-第１引数：ChatGPT サーバーのURL
+上記でインストールした create-global-txt コマンドを使用する
 
-第２引数：json ファイルの出力先
-
-第３引数：JSX が存在するディレクトリのパス
+```shell
+create-global-txt <ChatGPT サーバーのURL> <json ファイルの出力先パス> <JSX が存在するディレクトリのパス>
+```
 
 使用例
 
@@ -27,13 +28,60 @@ ls node_modules/.bin
 create-global-txt 'http://localhost:5555' '/Users/hamaike/src/v-expo-3d/src/constants/globalTxtBuilder/outputs' '/Users/hamaike/src/v-expo-3d/src'
 ```
 
-## GlobalText コンポーネントを試す
+## React で使用する
 
-```shell
-node ./dist/reactPackages/index.js
+冒頭でインストールした、@m-lab-inc/global-txt-builder から インポートして下さい。
+
+上述の create-global-txt コマンドで生成した json を、getTranslatedTxt に渡す事で翻訳済みテキストが取得可能です。
+
+コンポーネントの命名は、必ず "GlobalText" として下さい
+
+```tsx
+import React, {FC, useMemo} from 'react';
+import {getTranslatedTxt} from '@m-lab-inc/global-txt-builder';
+import globalTextMap from '../../../constants/globalTxtBuilder/outputs/globalTextMapCache.json';
+
+// mui
+import {Typography} from '@mui/material';
+import {TypographyProps} from '@mui/material/Typography/Typography';
+import {getLangCode} from '../../../utils/queryParamsHandler';
+
+interface Props {
+  typographyProps?: TypographyProps;
+}
+
+const GlobalText: FC<Props> = React.memo(({children, typographyProps = {}}) => {
+  const getLang = () => {
+    if (process.env.BUILD_LANG) {
+      return process.env.BUILD_LANG;
+    } else if (typeof window !== 'undefined') {
+      return getLangCode();
+    }
+    return null;
+  };
+
+  const translatedTxt = getTranslatedTxt({
+    lang: getLang(),
+    reactNode: children,
+    globalTextMap
+  });
+
+  return <Typography {...typographyProps}>{translatedTxt}</Typography>;
+});
+
+export default GlobalText;
+
 ```
 
-# 開発者向け
+このように使用する事で、「快適にご利用いただくために」は翻訳されます
+
+```tsx
+const Test = () => {
+  return <GlobalText>快適にご利用いただくために</GlobalText>
+}
+```
+
+# コントリビューター向け
 
 ## 多言語マップ生成をビルド
 
