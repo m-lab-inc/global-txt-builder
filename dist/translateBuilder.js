@@ -64,46 +64,25 @@ const main = ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTar
     console.log('args', translatorUrl, outputTargetDir, translateTargetDir);
     const targetTexts = yield getTranslateTargetTxt(translateTargetDir);
     console.log('typeof targetTexts: ', typeof targetTexts);
-    // if (!targetTexts) {
-    //   throw Error(
-    //     `JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`
-    //   );
-    // }
-    // console.info(`${targetTexts.length} 件のテキストが見つかりました`);
-    //
-    // const needGeneratedTexts = makeNeedGeneratedTexts(
-    //   targetTexts,
-    //   globalTextMapCache
-    // );
-    //
-    // console.info(`${needGeneratedTexts.length} 件のテキストが未翻訳です`);
-    //
-    // if (needGeneratedTexts.length === 0) {
-    //   console.log('生成が必要なテキストはありません。処理をスキップします');
-    //   return;
-    // }
-    //
-    // const response = await requestTranslatedData(
-    //   needGeneratedTexts,
-    //   translatorUrl
-    // );
-    //
-    // console.log('response status: ', response.status);
-    //
-    // if (!(response.status === 200 && response.json)) {
-    //   throw Error('chat-gpt へのリクエストが失敗しました');
-    // }
-    //
-    // console.log('トークン使用量：', response.json.usage);
-    //
-    // const output = makeOutputMap(response.json.content, needGeneratedTexts);
-    //
-    // const globalTextMap = {
-    //   ...globalTextMapCache,
-    //   ...output
-    // };
-    //
-    // writeOutputs(globalTextMap, outputTargetDir);
+    if (!targetTexts) {
+        throw Error(`JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`);
+    }
+    console.info(`${targetTexts.length} 件のテキストが見つかりました`);
+    const needGeneratedTexts = makeNeedGeneratedTexts(targetTexts, globalTextMapCache);
+    console.info(`${needGeneratedTexts.length} 件のテキストが未翻訳です`);
+    if (needGeneratedTexts.length === 0) {
+        console.log('生成が必要なテキストはありません。処理をスキップします');
+        return;
+    }
+    const response = yield requestTranslatedData(needGeneratedTexts, translatorUrl);
+    console.log('response status: ', response.status);
+    if (!(response.status === 200 && response.json)) {
+        throw Error('chat-gpt へのリクエストが失敗しました');
+    }
+    console.log('トークン使用量：', response.json.usage);
+    const output = makeOutputMap(response.json.content, needGeneratedTexts);
+    const globalTextMap = Object.assign(Object.assign({}, globalTextMapCache), output);
+    writeOutputs(globalTextMap, outputTargetDir);
 });
 exports.main = main;
 const makeNeedGeneratedTexts = (targetTexts, globalTextMapCache) => {
