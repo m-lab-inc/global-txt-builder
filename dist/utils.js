@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTranslatedTxt = exports.checkArgs = exports.normalizeString = exports.hashString = void 0;
+exports.parseGlobalTxt = exports.getTranslatedTxt = exports.checkArgs = exports.normalizeString = exports.hashString = void 0;
 const crypto = __importStar(require("crypto"));
 const hashString = (str) => {
     return crypto.createHash('sha256').update(str).digest('hex');
@@ -67,3 +67,12 @@ const getTranslatedTxt = ({ lang, reactNode, globalTextMap }) => {
     }
 };
 exports.getTranslatedTxt = getTranslatedTxt;
+const parseGlobalTxt = (input) => {
+    const regex = /<GlobalText>(.*?)<\/GlobalText>/;
+    const match = regex.exec(input);
+    if (match && match[1]) {
+        return match[1];
+    }
+    return null;
+};
+exports.parseGlobalTxt = parseGlobalTxt;

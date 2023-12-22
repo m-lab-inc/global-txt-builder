@@ -44,46 +44,46 @@ export const main = async ({
   console.log('args', translatorUrl, outputTargetDir, translateTargetDir);
   const targetTexts = await getTranslateTargetTxt(translateTargetDir);
   console.log('typeof targetTexts: ', typeof targetTexts);
-  if (!targetTexts) {
-    throw Error(
-      `JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`
-    );
-  }
-  console.info(`${targetTexts.length} 件のテキストが見つかりました`);
-
-  const needGeneratedTexts = makeNeedGeneratedTexts(
-    targetTexts,
-    globalTextMapCache
-  );
-
-  console.info(`${needGeneratedTexts.length} 件のテキストが未翻訳です`);
-
-  if (needGeneratedTexts.length === 0) {
-    console.log('生成が必要なテキストはありません。処理をスキップします');
-    return;
-  }
-
-  const response = await requestTranslatedData(
-    needGeneratedTexts,
-    translatorUrl
-  );
-
-  console.log('response status: ', response.status);
-
-  if (!(response.status === 200 && response.json)) {
-    throw Error('chat-gpt へのリクエストが失敗しました');
-  }
-
-  console.log('トークン使用量：', response.json.usage);
-
-  const output = makeOutputMap(response.json.content, needGeneratedTexts);
-
-  const globalTextMap = {
-    ...globalTextMapCache,
-    ...output
-  };
-
-  writeOutputs(globalTextMap, outputTargetDir);
+  // if (!targetTexts) {
+  //   throw Error(
+  //     `JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`
+  //   );
+  // }
+  // console.info(`${targetTexts.length} 件のテキストが見つかりました`);
+  //
+  // const needGeneratedTexts = makeNeedGeneratedTexts(
+  //   targetTexts,
+  //   globalTextMapCache
+  // );
+  //
+  // console.info(`${needGeneratedTexts.length} 件のテキストが未翻訳です`);
+  //
+  // if (needGeneratedTexts.length === 0) {
+  //   console.log('生成が必要なテキストはありません。処理をスキップします');
+  //   return;
+  // }
+  //
+  // const response = await requestTranslatedData(
+  //   needGeneratedTexts,
+  //   translatorUrl
+  // );
+  //
+  // console.log('response status: ', response.status);
+  //
+  // if (!(response.status === 200 && response.json)) {
+  //   throw Error('chat-gpt へのリクエストが失敗しました');
+  // }
+  //
+  // console.log('トークン使用量：', response.json.usage);
+  //
+  // const output = makeOutputMap(response.json.content, needGeneratedTexts);
+  //
+  // const globalTextMap = {
+  //   ...globalTextMapCache,
+  //   ...output
+  // };
+  //
+  // writeOutputs(globalTextMap, outputTargetDir);
 };
 
 const makeNeedGeneratedTexts = (
@@ -175,6 +175,17 @@ const getTranslateTargetTxt = async (translateTargetDir: string) => {
         }
       }
     });
+
+    // 正規表現を使用して文字列リテラル内の GlobalText タグを検出する
+    // シングルクォート、ダブルクォート、バッククォートを考慮
+    const regex = /['"`]<GlobalText>(.*?)<\/GlobalText>['"`]/g;
+    let match;
+
+    while ((match = regex.exec(content)) !== null) {
+      const text = match[1];
+      targetTexts.push(text);
+      console.log('found text in string literal:', text);
+    }
   });
 
   console.info(`対象ファイル群から、テキストの抜き出しが完了しました`);

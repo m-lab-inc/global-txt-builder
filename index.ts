@@ -5,4 +5,9 @@ if (require.main === module) {
   start();
 }
 
-export {hashString, getTranslatedTxt, normalizeString} from './utils';
+export {
+  hashString,
+  getTranslatedTxt,
+  normalizeString,
+  parseGlobalTxt
+} from './utils';

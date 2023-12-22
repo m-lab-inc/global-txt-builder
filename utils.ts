@@ -47,3 +47,12 @@ export const getTranslatedTxt = ({
     throw Error('reactNode は、string である必要があります');
   }
 };
+
+export const parseGlobalTxt = (input: string) => {
+  const regex = /<GlobalText>(.*?)<\/GlobalText>/;
+  const match = regex.exec(input);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+};

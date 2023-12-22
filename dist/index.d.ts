@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-export { hashString, getTranslatedTxt, normalizeString } from './utils';
+export { hashString, getTranslatedTxt, normalizeString, parseGlobalTxt } from './utils';

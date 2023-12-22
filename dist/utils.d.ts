@@ -11,3 +11,4 @@ export declare const getTranslatedTxt: ({ lang, reactNode, globalTextMap }: {
     reactNode: any;
     globalTextMap: Output;
 }) => string;
+export declare const parseGlobalTxt: (input: string) => string | null;
