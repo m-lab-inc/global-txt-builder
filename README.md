@@ -25,7 +25,7 @@ create-global-txt <ChatGPT サーバーのURL> <json ファイルの出力先パ
 使用例
 
 ```shell
-create-global-txt 'http://localhost:5555' '/Users/hamaike/src/v-expo-3d/src/constants/globalTxtBuilder/outputs' '/Users/hamaike/src/v-expo-3d/src'
+create-global-txt 'http://localhost:5555' '.src/constants/globalTxtBuilder/outputs' './src/v-expo-3d/src'
 ```
 
 ## React で使用する
