@@ -113,9 +113,7 @@ node ./dist/index.js 'http://localhost:5555' '/Users/hamaike/src/global-txt-buil
 
 ## ChatGPT サーバー
 
-cloudrun にデプロイ済み、エンドポイントは下記
-
-https://global-txt-server-hrqpvmnz3q-an.a.run.app
+cloudrun にデプロイ済み
 
 リポジトリ
 
