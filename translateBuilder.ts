@@ -179,7 +179,7 @@ const makeOutputMap = (json: string, needGeneratedTexts: string[]) => {
 
 const getTranslateTargetTxt = async (translateTargetDir: string) => {
   // src ディレクトリ内の全 .tsx/.jsx ファイルを検索
-  const paths = await glob(`${translateTargetDir}/**/*.+(tsx|jsx)`);
+  const paths = await glob(`${translateTargetDir}/**/*.+(tsx|jsx|ts|js)`);
 
   console.info('typeof paths: ', typeof paths);
 

@@ -149,7 +149,7 @@ const makeOutputMap = (json, needGeneratedTexts) => {
 };
 const getTranslateTargetTxt = (translateTargetDir) => __awaiter(void 0, void 0, void 0, function* () {
     // src ディレクトリ内の全 .tsx/.jsx ファイルを検索
-    const paths = yield (0, glob_1.glob)(`${translateTargetDir}/**/*.+(tsx|jsx)`);
+    const paths = yield (0, glob_1.glob)(`${translateTargetDir}/**/*.+(tsx|jsx|ts|js)`);
     console.info('typeof paths: ', typeof paths);
     if (!Array.isArray(paths))
         return null;
