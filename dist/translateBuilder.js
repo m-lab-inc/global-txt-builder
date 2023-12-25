@@ -45,33 +45,54 @@ const utils_1 = require("./utils");
 const constants_1 = require("./constants");
 const start = () => {
     const args = (0, utils_1.checkArgs)();
-    console.log(`${args.outputTargetDir}/${constants_1.CACHE_FILENAME}`);
-    try {
-        // キャッシュの json を取得
-        const file = fs.readFileSync(`${args.outputTargetDir}/${constants_1.CACHE_FILENAME}`, 'utf8');
-        const jsonObject = JSON.parse(file);
-        (0, exports.main)(Object.assign(Object.assign({}, args), { globalTextMapCache: jsonObject }));
-    }
-    catch (e) {
-        // キャッシュがなければ参照しない
-        console.info('キャッシュが見つかりませんでした、新しく生成します');
-        const jsonObject = JSON.parse('{}');
-        (0, exports.main)(Object.assign(Object.assign({}, args), { globalTextMapCache: jsonObject }));
-    }
+    const cachePath = `${args.outputTargetDir}/${constants_1.CACHE_FILENAME}`;
+    const userDictPath = `${args.outputTargetDir}/${constants_1.USER_DICT_FILENAME}`;
+    console.log(cachePath);
+    const cacheObject = makeCacheObj(cachePath);
+    const userDictObject = makeUserDictObj(userDictPath);
+    (0, exports.main)(Object.assign(Object.assign({}, args), { globalTextMapCache: cacheObject, userDict: userDictObject }));
 };
 exports.start = start;
-const main = ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTargetDir }) => __awaiter(void 0, void 0, void 0, function* () {
+const makeCacheObj = (cachePath) => {
+    try {
+        // キャッシュの json を取得
+        const cacheFile = fs.readFileSync(cachePath, 'utf8');
+        return JSON.parse(cacheFile);
+    }
+    catch (e) {
+        console.error(e);
+        // キャッシュがなければ参照しない
+        console.info('キャッシュが見つかりませんでした、新しく生成します');
+        return {};
+    }
+};
+const makeUserDictObj = (userDictPath) => {
+    try {
+        // ユーザー辞書の json を取得
+        const userDictFile = fs.readFileSync(userDictPath, 'utf8');
+        return JSON.parse(userDictFile);
+    }
+    catch (e) {
+        console.error(e);
+        // ユーザー辞書がなければ参照しない
+        console.info('ユーザー辞書が見つかりませんでした、新しく生成します');
+        return { dict: [] };
+    }
+};
+const main = ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTargetDir, userDict }) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('args', translatorUrl, outputTargetDir, translateTargetDir);
     const targetTexts = yield getTranslateTargetTxt(translateTargetDir);
     console.log('typeof targetTexts: ', typeof targetTexts);
     if (!targetTexts) {
         throw Error(`JSX の解析に失敗しました。translateTargetDir: ${translateTargetDir}`);
     }
-    console.info(`${targetTexts.length} 件のテキストが見つかりました`);
+    console.info(`##### ${targetTexts.length} 件のテキストが見つかりました #####`);
     const needGeneratedTexts = makeNeedGeneratedTexts(targetTexts, globalTextMapCache);
-    console.info(`${needGeneratedTexts.length} 件のテキストが未翻訳です`);
+    console.info(`##### ${needGeneratedTexts.length} 件のテキストが未翻訳です #####`);
     if (needGeneratedTexts.length === 0) {
-        console.log('生成が必要なテキストはありません。処理をスキップします');
+        console.info('##### 生成が必要なテキストはありません。処理をスキップします #####');
+        const globalTextMap = Object.assign({}, globalTextMapCache);
+        writeOutputs(globalTextMap, outputTargetDir, userDict);
         return;
     }
     const response = yield requestTranslatedData(needGeneratedTexts, translatorUrl);
@@ -82,7 +103,7 @@ const main = ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTar
     console.log('トークン使用量：', response.json.usage);
     const output = makeOutputMap(response.json.content, needGeneratedTexts);
     const globalTextMap = Object.assign(Object.assign({}, globalTextMapCache), output);
-    writeOutputs(globalTextMap, outputTargetDir);
+    writeOutputs(globalTextMap, outputTargetDir, userDict);
 });
 exports.main = main;
 const makeNeedGeneratedTexts = (targetTexts, globalTextMapCache) => {
@@ -98,8 +119,11 @@ const makeNeedGeneratedTexts = (targetTexts, globalTextMapCache) => {
     });
     return needGeneratedTexts;
 };
-const writeOutputs = (globalTextMap, outputTargetDir) => {
-    const globalTextMapCacheOutput = `${JSON.stringify(globalTextMap)}`;
+const writeOutputs = (globalTextMap, outputTargetDir, userDict) => {
+    // ユーザー辞書で上書きを行う
+    const { globalTextMapCacheCopy, results } = overwriteWithUserDict(globalTextMap, userDict);
+    console.info('ユーザー辞書での上書きに成功しました', results);
+    const globalTextMapCacheOutput = `${JSON.stringify(globalTextMapCacheCopy)}`;
     fs.writeFileSync(`${outputTargetDir}/${constants_1.CACHE_FILENAME}`, globalTextMapCacheOutput, 'utf8');
 };
 const makeOutputMap = (json, needGeneratedTexts) => {
@@ -193,3 +217,25 @@ const requestTranslatedData = (targetTexts, translatorUrl) => __awaiter(void 0, 
     console.info('End ChatGPT request.');
     return response;
 });
+const overwriteWithUserDict = (globalTextMapCache, userDict) => {
+    const results = [];
+    const globalTextMapCacheCopy = Object.assign({}, globalTextMapCache);
+    try {
+        userDict.dict.forEach(dict => {
+            const hashedText = (0, utils_1.hashString)(dict.key);
+            const cache = globalTextMapCacheCopy[hashedText];
+            if (cache) {
+                for (const lang in cache) {
+                    if (dict.value[lang]) {
+                        results.push({ from: cache[lang], to: dict.value[lang] });
+                        cache[lang] = dict.value[lang];
+                    }
+                }
+            }
+        });
+    }
+    catch (e) {
+        console.error(e);
+    }
+    return { globalTextMapCacheCopy, results };
+};

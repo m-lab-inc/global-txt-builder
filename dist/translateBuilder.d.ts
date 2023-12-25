@@ -1,7 +1,9 @@
+import { Output, UserDict } from './models';
 export declare const start: () => void;
-export declare const main: ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTargetDir }: {
+export declare const main: ({ translatorUrl, outputTargetDir, globalTextMapCache, translateTargetDir, userDict }: {
     translatorUrl: string;
     outputTargetDir: string;
-    globalTextMapCache: object;
+    globalTextMapCache: Output;
     translateTargetDir: string;
+    userDict: UserDict;
 }) => Promise<void>;

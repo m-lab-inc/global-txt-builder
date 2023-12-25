@@ -82,6 +82,75 @@ const Test = () => {
 }
 ```
 
+## 文字列リテラルに使用
+
+また、文字列リテラルに記述することでも翻訳対象にすることが可能です
+
+ただし、改行などには未対応です。
+
+```tsx
+const str = `<GlobalText>コメントを入力して下さい</GlobalText>`
+```
+
+文字列リテラルの場合は、parseGlobalTxt をインポートし、getTranslatedTxt と組み合わせた
+関数を作成することで、下記の様な使い方が可能です。
+parseGlobalTxt は、GlobalText タグ内に記述されている文字列を取り出す関数です。
+
+```tsx
+export const translateGlobalTxt = (stringLiteral: string): string => {
+  const text = parseGlobalTxt(stringLiteral);
+  if (text) {
+    const lang = getLang();
+    return getTranslatedTxt({
+      lang: lang,
+      reactNode: text,
+      globalTextMap
+    });
+  } else {
+    console.error(
+      `
+      テキストを抽出することができませんでした、文字列は１行のみ対応しています。
+      GlobalText タグにタイポなどがないか確認して下さい。
+      `
+    );
+    return stringLiteral;
+  }
+};
+
+const SampleInputComponent = () => {
+  return (
+    <OutlinedInput
+      placeholder={translateGlobalTxt(
+        `<GlobalText>コメントを入力して下さい</GlobalText>`
+      )}
+      multiline
+    />
+  )
+}
+```
+
+## ユーザー辞書
+
+ユーザー辞書が存在する場合、ビルドフローの最後にユーザー辞書で上書きします。
+
+globalTextMapCache.json と同一フォルダ内に、userDict.json を作成し、下記の形式で
+ユーザー辞書を定義することが可能です。
+
+```json
+{
+  "dict": [
+    {
+      "key": "ライブ配信",
+      "value": {
+        "en": "live"
+      }
+    }
+  ]
+}
+```
+
+## npm-scripts
+
 npm-scripts に、下記の様に記述すれば、CI/CD に組み込むこともできるでしょう。
 
 ```json
@@ -104,7 +173,7 @@ yarn build
 ## 多言語マップ生成を実行
 
 ```shell
-node ./dist/index.js 'http://localhost:5555' '/Users/hamaike/src/global-txt-builder/outputs' '/Users/hamaike/src/v-expo-3d/src'
+node ./dist/index.js <ChatGPT サーバーのURL> <json ファイルの出力先パス> <JSX が存在するディレクトリのパス>
 ```
 
 ## デプロイ
